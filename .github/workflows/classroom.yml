@@ -1,0 +1,50 @@
+name: Autograding Tests
+'on':
+  - push
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Typechecking
+        id: typechecking
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Typechecking
+          setup-command: npm install
+          command: npm run type-check
+          timeout: 10
+          max-score: 1
+      - name: Integrations tests
+        id: integrations-tests
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Integrations tests
+          setup-command: npm install
+          command: npm run test
+          timeout: 10
+          max-score: 3
+      - name: Coverage report
+        id: coverage-report
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Coverage report
+          setup-command: npm install
+          command: npm run test:coverage
+          timeout: 10
+          max-score: 1
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          TYPECHECKING_RESULTS: '${{steps.typechecking.outputs.result}}'
+          INTEGRATIONS-TESTS_RESULTS: '${{steps.integrations-tests.outputs.result}}'
+          COVERAGE-REPORT_RESULTS: '${{steps.coverage-report.outputs.result}}'
+        with:
+          runners: typechecking,integrations-tests,coverage-report
