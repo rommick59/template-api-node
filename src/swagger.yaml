@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: API de gestion de cartes Pokémon
+  description: Documentation de l'API pour gérer les utilisateurs et les cartes Pokémon
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: User
+    description: Routes pour la gestion des utilisateurs
+paths:
+  /user:
+    get:
+      tags:
+        - User
+      summary: Récupérer tous les utilisateurs
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '204':
+          description: Aucun utilisateur trouvé
+    post:
+      tags:
+        - User
+      summary: Créer un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: L'email de l'utilisateur
+                  example: 'user@example.com'
+                password:
+                  type: string
+                  description: Le mot de passe de l'utilisateur
+                  example: 'password123'
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+        '400':
+          description: Email ou mot de passe manquants ou invalide
+        '409':
+          description: L'email est déjà utilisé
+  /user/{userId}:
+    get:
+      tags:
+        - User
+      summary: Récupérer un utilisateur par ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
+    put:
+      tags:
+        - User
+      summary: Mettre à jour un utilisateur
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Utilisateur modifié avec succès
+        '400':
+          description: Erreur dans les données fournies
+        '404':
+          description: Utilisateur non trouvé
+    delete:
+      tags:
+        - User
+      summary: Supprimer un utilisateur
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur supprimé avec succès
+        '404':
+          description: Utilisateur non trouvé
+  /user/login:
+    post:
+      tags:
+        - User
+      summary: Connecter un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: L'email de l'utilisateur
+                  example: 'user@example.com'
+                password:
+                  type: string
+                  description: Le mot de passe de l'utilisateur
+                  example: 'password123'
+      responses:
+        '200':
+          description: Authentification réussie, un token est retourné
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Le token JWT pour l'utilisateur
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        '400':
+          description: Email ou mot de passe manquants ou incorrects
+        '404':
+          description: Utilisateur non trouvé
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: L'ID de l'utilisateur
+        email:
+          type: string
+          description: L'email de l'utilisateur
+        password:
+          type: string
+          description: Le mot de passe de l'utilisateur
+      required:
+        - email
+        - password
